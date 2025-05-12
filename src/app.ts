@@ -8,8 +8,12 @@ import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import authRouter from "./routes/auth";
 
+import { StatusCodes } from "http-status-codes";
+import ErrorHandlerMiddleware from "./middleware/errorHandler";
+import ConnectDB from "./DB/connectDb";
+
+const PORT = process.env.PORT || 8000;
 const app = express();
-const port = process.env.PORT || 8000;
 
 // Middleware
 app.use(express.json());
@@ -23,14 +27,15 @@ if (process.env.NODE_ENV === "development") {
 
 app.use("/api/v1/auth", authRouter);
 
-app.get("/", (req, res) => {
-  res.send("Hello World!");
+app.use("*", (req, res) => {
+  res.status(StatusCodes.NOT_FOUND).json({ message: "Route does not exist" });
 });
 
-const start = () => {
-  app.listen(port, () => {
-    console.log(`Express is listening at http://localhost:${port}`);
-  });
+app.use(ErrorHandlerMiddleware);
+
+const start = async () => {
+  await ConnectDB(process.env.MONGO_URI as string);
+  app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
 };
 
 start();
