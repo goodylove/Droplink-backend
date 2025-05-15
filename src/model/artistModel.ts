@@ -6,14 +6,17 @@ const ProfileSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
+  title: {
+    type: String,
+    required: true,
+  },
   bio: {
     type: String,
     required: true,
   },
-  avatar: {
-    type: String,
-  },
+  avatar: String,
+  avatarPublicId: String,
 
-  links: [{ platform: "spotify", url: String }],
-  socials: [{ name: "instagram", url: String }],
+  links: [{ platform: String, url: String }],
+  socials: [{ name: String, url: String }],
 });
