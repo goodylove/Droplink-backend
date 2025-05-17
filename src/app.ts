@@ -7,10 +7,11 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import authRouter from "./routes/auth";
+import artistRouter from "./routes/artist";
 
 import { StatusCodes } from "http-status-codes";
 import ErrorHandlerMiddleware from "./middleware/errorHandler";
-import ConnectDB from "./DB/connectDb";
+import ConnectDB from "./DB/ConnectDB";
 
 const PORT = process.env.PORT || 8000;
 const app = express();
@@ -26,6 +27,7 @@ if (process.env.NODE_ENV === "development") {
 // Routes
 
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/artist", artistRouter);
 
 app.use("*", (req, res) => {
   res.status(StatusCodes.NOT_FOUND).json({ message: "Route does not exist" });

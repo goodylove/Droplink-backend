@@ -6,8 +6,13 @@ import {
   getArtistById,
   updateArtist,
 } from "../controller/artist";
+import { validateArtistInputs } from "../middleware/validationMiddleware";
+import { authMiddleware } from "../middleware/authMiddleware";
 
 const Router = express.Router();
 
-Router.route("/").get(getAllArtist).post(createArtist);
+Router.route("/")
+  .get(getAllArtist)
+  .post(validateArtistInputs, authMiddleware, createArtist);
 Router.route("/:id").get(getArtistById).patch(updateArtist);
+export default Router;
