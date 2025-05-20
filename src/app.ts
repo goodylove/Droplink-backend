@@ -5,17 +5,20 @@ dotenv.config();
 
 import express from "express";
 import cookieParser from "cookie-parser";
+import { StatusCodes } from "http-status-codes";
 import morgan from "morgan";
+import cors from "cors";
+
 import authRouter from "./routes/auth";
 import artistRouter from "./routes/artist";
-
-import { StatusCodes } from "http-status-codes";
 import ErrorHandlerMiddleware from "./middleware/errorHandler";
 import ConnectDB from "./DB/ConnectDB";
 
 const PORT = process.env.PORT || 8000;
 const app = express();
 
+app.use(cors());
+app.use(express.urlencoded({ extended: true }));
 // Middleware
 app.use(express.json());
 app.use(cookieParser(process.env.JWT_SECRET));
