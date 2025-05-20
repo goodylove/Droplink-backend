@@ -1,8 +1,10 @@
 import { StatusCodes } from "http-status-codes";
+import crypto from "crypto";
 import User from "../model/UserModel";
+import Token from "../model/token";
 import { comparePassword, hashPassword } from "../utils/hashPassword";
 import { BadRequestError, UnauthenticatedError } from "../errors/customsErrors";
-import { createJwt } from "../utils/token";
+import { attachCookieToResponse, createJwt } from "../utils/token";
 
 // Create a new user
 export const Register = async (req: any, res: any) => {
@@ -29,23 +31,64 @@ export const Login = async (req: any, res: any) => {
     throw new UnauthenticatedError("Invalid credentials");
   }
 
-  const UserPayload = {
-    userId: user._id,
+  const userDetails = {
     name: user.name,
+    email: user.email,
+    userId: user._id,
   };
 
-  const token = createJwt(UserPayload);
-  const oneDay = 1000 * 60 * 60 * 24;
+  // create refreshToken
+  let refreshToken = "";
 
-  res.cookie("token", token, {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    expires: new Date(Date.now() + oneDay * 5),
+  // check for existing token
+  const existingToken = await Token.findOne({ user: user._id });
+
+  if (existingToken) {
+    if (!existingToken.isValid) {
+      throw new UnauthenticatedError("invalid credentials");
+    }
+    refreshToken = existingToken?.refreshToken;
+    attachCookieToResponse({ res, userId: user._id, refreshToken });
+    res
+      .status(StatusCodes.OK)
+      .json({ message: "User loggedIn successfully", userDetails });
+    return;
+  }
+
+  // create new token if no existing token
+
+  refreshToken = crypto.randomBytes(40).toString("hex");
+  const userAgent = req.headers["user-agent"];
+  const ip = req.ip;
+  const token = await Token.create({
+    user: user._id,
+    userAgent,
+    refreshToken,
+    ip,
   });
-
-  res.status(StatusCodes.OK).json({ message: "User logged in successfully" });
+  attachCookieToResponse({ res, userId: user._id, refreshToken });
+  res
+    .status(StatusCodes.OK)
+    .json({ message: "User loggedIn successfully", userDetails });
 };
 
-const logout = async (req: any, res: any) => {
+export const Logout = async (req: any, res: any) => {
+  // console.log(req.user);
+  // await Token.findOneAndUpdate({ user: req.user.userId });
+  // res.clearCookie("accessToken");
+
+  res.clearCookie("accessToken", {
+    httpOnly: true,
+
+    // signed: true,
+    expires: new Date(Date.now()),
+  });
+
+  res.clearCookie("refreshToken", {
+    httpOnly: true,
+
+    // signed: true,
+    expires: new Date(Date.now()),
+  });
   res.status(StatusCodes.OK).send("User logged out successfully");
 };

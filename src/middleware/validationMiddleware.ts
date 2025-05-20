@@ -67,15 +67,15 @@ export const validateArtistInputs = withValidationError([
     .withMessage("username is required")
     .custom(async (username) => {
       const artist = await User.findOne({ username });
-      console.log(artist);
+      // console.log(artist);
       if (artist) {
         throw new BadRequestError("username already exist");
       }
     }),
-  body("links.*.platform")
-    .isIn(Object.values(PLATFORMS))
-    .isEmpty()
-    .withMessage("platform  is required"),
+  // body("links.*.platform")
+  //   .isIn(Object.values(PLATFORMS))
+  //   .isEmpty()
+  //   .withMessage("platform  is required"),
   // body(".*.url")
   //   .isIn(Object.values(SOCIALS_LINK))
   //   .withMessage("url is required"),

@@ -3,7 +3,8 @@ import { Types } from "mongoose";
 
 export type UserPayload = {
   userId: Types.ObjectId;
-  name: string;
+
+  refreshToken?: string;
 };
 
 export interface CustomRequest extends Request {
