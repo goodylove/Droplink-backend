@@ -3,6 +3,7 @@ import { body, param, validationResult } from "express-validator";
 import { BadRequestError } from "../errors/customsErrors";
 import { PLATFORMS, SOCIALS_LINK } from "../utils/constant";
 import User from "../model/UserModel";
+import Artist from "../model/artistModel";
 
 // validation function
 
@@ -66,19 +67,27 @@ export const validateArtistInputs = withValidationError([
     .notEmpty()
     .withMessage("username is required")
     .custom(async (username) => {
-      const artist = await User.findOne({ username });
-      // console.log(artist);
+      const artist = await Artist.findOne({ username });
       if (artist) {
         throw new BadRequestError("username already exist");
       }
     }),
-  // body("links.*.platform")
-  //   .isIn(Object.values(PLATFORMS))
-  //   .isEmpty()
-  //   .withMessage("platform  is required"),
-  // body(".*.url")
-  //   .isIn(Object.values(SOCIALS_LINK))
-  //   .withMessage("url is required"),
-  // validateLinks,
-  // validateSocials,
+  body("links")
+    .isArray({ min: 1 })
+    .withMessage("links is required and should be an array"),
+  body("links.*.platform").notEmpty().withMessage("platform  is required"),
+  body("links.*.url")
+    .notEmpty()
+    .withMessage("url is required")
+    .isURL()
+    .withMessage("url is not valid"),
+  body("socials")
+    .isArray({ min: 1 })
+    .withMessage("social is required and should be an array"),
+  body("socials.*.name").notEmpty().withMessage("the name is required"),
+  body("socials.*.url")
+    .notEmpty()
+    .withMessage("url is required")
+    .isURL()
+    .withMessage("url is not valid"),
 ]);
