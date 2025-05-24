@@ -4,6 +4,7 @@ import {
   createArtist,
   getAllArtist,
   getArtistById,
+  getArtistByUsername,
   getCurrentArtist,
   updateArtist,
   UploadArtistImage,
@@ -26,5 +27,6 @@ Router.route("/uploadImage").post(
 
 Router.route("/current-user").get(authMiddleware, getCurrentArtist);
 
+Router.route("/username/:username").get(getArtistByUsername);
 Router.route("/:id").get(getArtistById).patch(updateArtist);
 export default Router;

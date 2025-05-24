@@ -19,9 +19,11 @@ export async function createArtist(req: CustomRequest, res: Response) {
   req.body.userId = req.user;
 
   const artist = await Artist.create(req.body);
+  const PublicLink = `  http://localhost:3000/artist/${artist.username}`;
   res.status(StatusCodes.OK).json({
     message: "Artist created successfully",
     data: artist,
+    PublicLink,
   });
 }
 
@@ -30,6 +32,7 @@ export async function UploadArtistImage(
   res: Response
 ): Promise<void> {
   // Check if the user is authenticated
+  console.log("User ID:", req.user);
   const artist = await Artist.findOne({ userId: req.user });
 
   if (!artist) {
@@ -84,5 +87,19 @@ export async function getCurrentArtist(req: CustomRequest, res: Response) {
   res.status(StatusCodes.OK).json({
     message: "Current artist retrieved successfully",
     data: removePassword,
+  });
+}
+
+export async function getArtistByUsername(req: CustomRequest, res: Response) {
+  console.log(req.params.username);
+  const artist = await Artist.findOne({ username: req.params.username });
+
+  if (!artist) {
+    throw new BadRequestError("Artist not found");
+  }
+
+  res.status(StatusCodes.OK).json({
+    message: "Current artist retrieved successfully",
+    artist,
   });
 }
