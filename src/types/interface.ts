@@ -8,5 +8,6 @@ export type UserPayload = {
 };
 
 export interface CustomRequest extends Request {
-  user?: string; // Add the user property to the request object
+  user?: string;
+  file?: Express.Multer.File;
 }
