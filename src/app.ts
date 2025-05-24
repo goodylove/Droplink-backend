@@ -8,14 +8,21 @@ import cookieParser from "cookie-parser";
 import { StatusCodes } from "http-status-codes";
 import morgan from "morgan";
 import cors from "cors";
+import { v2 as cloudinary } from "cloudinary";
 
 import authRouter from "./routes/auth";
-import artistRouter from "./routes/artist";
+import artistRouter from "./routes/artistProfile";
 import ErrorHandlerMiddleware from "./middleware/errorHandler";
 import ConnectDB from "./DB/ConnectDB";
 
 const PORT = process.env.PORT || 8000;
 const app = express();
+
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME!,
+  api_key: process.env.CLOUD_API_KEY!,
+  api_secret: process.env.CLOUD_API_SECRET!,
+});
 
 app.use(cors());
 app.use(express.urlencoded({ extended: true }));

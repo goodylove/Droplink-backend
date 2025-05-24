@@ -4,15 +4,27 @@ import {
   createArtist,
   getAllArtist,
   getArtistById,
+  getCurrentArtist,
   updateArtist,
-} from "../controller/artist";
+  UploadArtistImage,
+} from "../controller/artistProfile";
 import { validateArtistInputs } from "../middleware/validationMiddleware";
 import { authMiddleware } from "../middleware/authMiddleware";
+import multerUpload from "../middleware/multerValidation";
 
 const Router = express.Router();
 
 Router.route("/")
   .get(getAllArtist)
-  .post(validateArtistInputs, authMiddleware, createArtist);
+  .post(authMiddleware, validateArtistInputs, createArtist);
+
+Router.route("/uploadImage").post(
+  authMiddleware,
+  multerUpload.single("avatar"),
+  UploadArtistImage
+);
+
+Router.route("/current-user").get(authMiddleware, getCurrentArtist);
+
 Router.route("/:id").get(getArtistById).patch(updateArtist);
 export default Router;
