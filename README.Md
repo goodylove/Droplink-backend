@@ -1,4 +1,4 @@
-# Droplink Backend
+# Droplink Backend(MVP)
 
 Droplink is a simple platform that allows artists customize and share a public profile containing their bio, avatar, social links, and other important information — all accessible through a single link.
 
