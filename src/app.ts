@@ -24,7 +24,12 @@ cloudinary.config({
   api_secret: process.env.CLOUD_API_SECRET!,
 });
 
-app.use(cors());
+app.use(
+  cors({
+    origin: "http://localhost:3000",
+    credentials: true, // Allow credentials like cookies to be sent
+  })
+);
 app.use(express.urlencoded({ extended: true }));
 // Middleware
 app.use(express.json());
