@@ -41,8 +41,8 @@ if (process.env.NODE_ENV === "development") {
 app.get("/ping", (req, res) => {
   res.status(200).send("pong");
 });
-app.get("/ping", (req, res) => {
-  res.status(200).send("Welcome to the Music App API");
+app.get("/", (req, res) => {
+  res.status(StatusCodes.OK).send("Welcome to the Music App API");
 });
 // Routes
 
