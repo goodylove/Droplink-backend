@@ -26,7 +26,7 @@ export function attachCookieToResponse({
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    expires: new Date(Date.now() + 1000),
+    expires: new Date(Date.now() + oneDay * 3),
   });
 
   res.cookie("refreshToken", refreshTokenJwt, {
