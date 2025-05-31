@@ -38,7 +38,7 @@ export const authMiddleware = async (
         refreshToken: payload.refreshToken,
       });
 
-      if (!existingToken && !existingToken.isValid) {
+      if (!existingToken || !existingToken.isValid) {
         throw new UnAuthorized("Invalid refresh token");
       }
 
