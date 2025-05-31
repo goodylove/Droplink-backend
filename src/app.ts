@@ -38,7 +38,12 @@ app.use(cookieParser(process.env.JWT_SECRET));
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
 }
-
+app.get("/ping", (req, res) => {
+  res.status(200).send("pong");
+});
+app.get("/ping", (req, res) => {
+  res.status(200).send("Welcome to the Music App API");
+});
 // Routes
 
 app.use("/api/v1/auth", authRouter);
