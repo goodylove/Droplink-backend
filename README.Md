@@ -4,6 +4,21 @@ Droplink is a simple platform that allows artists customize and share a public p
 
 This backend is built with **Node.js**, **Express**, and **MongoDB**, and it handles authentication, artist profile creation, image uploads, and public profile access.
 
+## 🚀 Continuous Integration (CI)
+
+This project uses **GitHub Actions** for continuous integration to ensure that every code update is safe and stable.
+
+### ✅ CI Pipeline Steps
+
+On every push to the `main` branch (or any PR), the following steps run automatically:
+
+1. ** Checkout Code** – Fetch the latest code from GitHub.
+2. ** Setup Node.js** – Use the correct Node.js version.
+3. ** Install Dependencies** – Run `npm install`.
+4. ** Build the Project** – Run `npm run build` to ensure the app compiles.
+
+You can view and configure this in `.github/workflows/ci.yml`.
+
 ---
 
 ## Features
