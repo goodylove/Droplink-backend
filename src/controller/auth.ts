@@ -73,10 +73,6 @@ export const Login = async (req: any, res: any) => {
 };
 
 export const Logout = async (req: any, res: any) => {
-  // console.log(req.user);
-  // await Token.findOneAndUpdate({ user: req.user.userId });
-  // res.clearCookie("accessToken");
-
   res.clearCookie("accessToken", {
     httpOnly: true,
 
@@ -86,7 +82,6 @@ export const Logout = async (req: any, res: any) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
 
-    // signed: true,
     expires: new Date(Date.now()),
   });
   res.status(StatusCodes.OK).send("User logged out successfully");

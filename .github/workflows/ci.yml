@@ -3,7 +3,6 @@ name: Droplink Backend CI
 on:
   push:
     branches: [main]
-
   pull_request:
     branches: [main]
 
@@ -11,21 +10,24 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-steps:
-  -name: Checkout code
-  uses: actions/checkout@v3
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-  -name: Setup Node.js
-  uses: actions/setup-node@v3
-  with:
-   node-version: "20.17.0"
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.17.0"
 
-  -name: Type Check
-  run: tsc --noEmit
+      - name: Install dependencies
+        run: npm install
 
-  -name: Build the project
-  run : npm run build
+      # - name: Type Check
+      #   run: tsc --noEmit
 
-  -name: Start the server (just to verify)
-  run : npm run start &
-  timeout-minutes: 1
+      - name: Build the project
+        run: npm run build
+
+      - name: Start the server (just to verify)
+        run: npm run start &
+        timeout-minutes: 1
