@@ -27,13 +27,14 @@ export function attachCookieToResponse({
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     expires: new Date(Date.now() + oneDay * 3),
+    sameSite: "none",
   });
 
   res.cookie("refreshToken", refreshTokenJwt, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-
     expires: new Date(Date.now() + longExp),
+    sameSite: "none",
   });
 }
 

@@ -80,7 +80,6 @@ export const Logout = async (req: any, res: any) => {
   res.clearCookie("accessToken", {
     httpOnly: true,
 
-    // signed: true,
     expires: new Date(Date.now()),
   });
 
