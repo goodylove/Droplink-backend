@@ -14,6 +14,7 @@ import authRouter from "./routes/auth";
 import artistRouter from "./routes/artistProfile";
 import ErrorHandlerMiddleware from "./middleware/errorHandler";
 import ConnectDB from "./DB/ConnectDB";
+import { authMiddleware } from "./middleware/authMiddleware";
 
 const PORT = process.env.PORT || 8000;
 const app = express();
@@ -47,7 +48,7 @@ app.get("/", (req, res) => {
 // Routes
 
 app.use("/api/v1/auth", authRouter);
-app.use("/api/v1/artist", artistRouter);
+app.use("/api/v1/artist", authMiddleware, artistRouter);
 
 app.use("*", (req, res) => {
   res.status(StatusCodes.NOT_FOUND).json({ message: "Route does not exist" });
