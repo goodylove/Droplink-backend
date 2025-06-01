@@ -28,7 +28,7 @@ cloudinary.config({
 app.use(
   cors({
     origin: "http://localhost:3000",
-    credentials: true, // Allow credentials like cookies to be sent
+    credentials: true,
   })
 );
 app.use(express.urlencoded({ extended: true }));
@@ -48,6 +48,7 @@ app.get("/", (req, res) => {
 // Routes
 
 app.use("/api/v1/auth", authRouter);
+
 app.use("/api/v1/artist", authMiddleware, artistRouter);
 
 app.use("*", (req, res) => {
