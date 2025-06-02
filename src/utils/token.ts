@@ -25,16 +25,18 @@ export function attachCookieToResponse({
 
   res.cookie("accessToken", accessToken, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // secure: process.env.NODE_ENV === "production",
+    secure: true,
     expires: new Date(Date.now() + oneDay * 3),
-    sameSite: "lax",
+    sameSite: "none",
   });
 
   res.cookie("refreshToken", refreshTokenJwt, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    // secure: process.env.NODE_ENV === "production",
+    secure: true,
     expires: new Date(Date.now() + longExp),
-    sameSite: "lax",
+    sameSite: "none",
   });
 }
 
