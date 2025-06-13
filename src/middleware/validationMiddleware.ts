@@ -1,11 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { body, param, validationResult } from "express-validator";
-import { BadRequestError } from "../errors/customsErrors";
-import { PLATFORMS, SOCIALS_LINK } from "../utils/constant";
+
 import User from "../model/UserModel";
 import Artist from "../model/artistModel";
 
-// validation function
+import { BadRequestError } from "../errors/customsErrors";
 
 const withValidationError = (validations: any[]) => {
   return [
@@ -22,6 +21,15 @@ const withValidationError = (validations: any[]) => {
     },
   ];
 };
+
+export const validateLoginInput = withValidationError([
+  body("email")
+    .notEmpty()
+    .withMessage("email is required")
+    .isEmail()
+    .withMessage("invalid email"),
+  body("password").notEmpty().withMessage("password is required"),
+]);
 
 export const validateRegisteredUserInput = withValidationError([
   body("name").notEmpty().withMessage("name is required"),
@@ -48,15 +56,6 @@ export const validateRegisteredUserInput = withValidationError([
     .withMessage("confirmPassword must be at least  8 character long"),
 ]);
 
-export const validateLoginInput = withValidationError([
-  body("email")
-    .notEmpty()
-    .withMessage("email is required")
-    .isEmail()
-    .withMessage("invalid email"),
-  body("password").notEmpty().withMessage("password is required"),
-]);
-
 export const validateArtistInputs = withValidationError([
   body("title")
     .notEmpty()
@@ -76,18 +75,18 @@ export const validateArtistInputs = withValidationError([
     .isArray({ min: 1 })
     .withMessage("links is required and should be an array"),
   body("links.*.platform").notEmpty().withMessage("platform  is required"),
-  body("links.*.url")
+  body("links.*.link")
     .notEmpty()
-    .withMessage("url is required")
+    .withMessage("link is required")
     .isURL()
-    .withMessage("url is not valid"),
+    .withMessage("link is not valid"),
   body("socials")
     .isArray({ min: 1 })
     .withMessage("social is required and should be an array"),
   body("socials.*.name").notEmpty().withMessage("the name is required"),
-  body("socials.*.url")
+  body("socials.*.link")
     .notEmpty()
-    .withMessage("url is required")
+    .withMessage("link is required")
     .isURL()
-    .withMessage("url is not valid"),
+    .withMessage("link is not valid"),
 ]);

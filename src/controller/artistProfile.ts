@@ -19,11 +19,11 @@ export async function createArtist(req: CustomRequest, res: Response) {
   req.body.userId = req.user;
 
   const artist = await Artist.create(req.body);
-  const PublicLink = `  http://localhost:3000/artist/${artist.username}`;
+  const publicLink = `  http://localhost:3000/artist/share/${artist.username}`;
   res.status(StatusCodes.OK).json({
     message: "Artist created successfully",
     data: artist,
-    PublicLink,
+    publicLink,
   });
 }
 

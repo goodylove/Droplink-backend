@@ -25,8 +25,10 @@ Router.route("/uploadImage").post(
   UploadArtistImage
 );
 
-Router.route("/current-user").get(getCurrentArtist);
+Router.route("/current-user").get(authMiddleware, getCurrentArtist);
 
 Router.route("/username/:username").get(getArtistByUsername);
-Router.route("/:id").get(getArtistById).patch(updateArtist);
+Router.route("/:id")
+  .get(authMiddleware, getArtistById)
+  .patch(authMiddleware, updateArtist);
 export default Router;

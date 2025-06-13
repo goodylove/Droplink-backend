@@ -25,16 +25,17 @@ cloudinary.config({
   api_secret: process.env.CLOUD_API_SECRET!,
 });
 
+app.use(express.json());
+app.use(cookieParser(process.env.JWT_SECRET));
+app.use(express.urlencoded({ extended: true }));
+
 app.use(
   cors({
     origin: "http://localhost:3000",
     credentials: true,
   })
 );
-app.use(express.urlencoded({ extended: true }));
 // Middleware
-app.use(express.json());
-app.use(cookieParser(process.env.JWT_SECRET));
 
 if (process.env.NODE_ENV === "development") {
   app.use(morgan("dev"));
@@ -49,7 +50,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1/auth", authRouter);
 
-app.use("/api/v1/artist", authMiddleware, artistRouter);
+app.use("/api/v1/artist", artistRouter);
 
 app.use("*", (req, res) => {
   res.status(StatusCodes.NOT_FOUND).json({ message: "Route does not exist" });
