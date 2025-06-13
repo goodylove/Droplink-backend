@@ -50,7 +50,7 @@ app.get("/", (req, res) => {
 
 app.use("/api/v1/auth", authRouter);
 
-app.use("/api/v1/artist", authMiddleware, artistRouter);
+app.use("/api/v1/artist", artistRouter);
 
 app.use("*", (req, res) => {
   res.status(StatusCodes.NOT_FOUND).json({ message: "Route does not exist" });

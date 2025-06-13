@@ -2,12 +2,12 @@ import mongoose from "mongoose";
 
 const LinkSchema = new mongoose.Schema({
   platform: { type: String, required: true }, // e.g., 'Spotify'
-  url: { type: String, required: true },
+  link: { type: String, required: true },
 });
 
 const SocialSchema = new mongoose.Schema({
   name: { type: String, required: true }, // e.g., 'Instagram'
-  url: { type: String, required: true },
+  link: { type: String, required: true },
 });
 
 const ProfileSchema = new mongoose.Schema({
