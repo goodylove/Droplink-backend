@@ -24,6 +24,7 @@
     "@types/cookie-parser": "^1.4.8",
     "@types/helmet": "^0.0.48",
     "@types/jsonwebtoken": "^9.0.9",
+    "axios": "^1.10.0",
     "bcryptjs": "^2.4.3",
     "cloudinary": "^1.37.3",
     "cookie-parser": "^1.4.6",
