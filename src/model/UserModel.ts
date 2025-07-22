@@ -9,6 +9,7 @@ const UserSchema = new mongoose.Schema(
       unique: true, // Ensure email is unique
     },
     password: String,
+    avatar: String,
     googleId: {
       type: String,
       unique: true, // Optional but recommended

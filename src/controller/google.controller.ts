@@ -2,14 +2,16 @@ import axios from "axios";
 import { Request, Response } from "express";
 import User from "../model/UserModel";
 import jwt from "jsonwebtoken";
+import { header } from "express-validator";
+import qs from "qs";
 
 export const RedirectUserToGoogle = async (req: Request, res: Response) => {
   const redirectUrl = `https://accounts.google.com/o/oauth2/auth`;
 
   const options = {
     client_id: process.env.GOOGLE_CLIENT_ID,
+    // client_secret: process.env.GOOGLE_CLIENT_SECRET,
     redirect_uri: process.env.GOOGLE_CALLBACK_URL,
-    client_secret: process.env.GOOGLE_CLIENT_SECRET,
     response_type: "code",
     scope: [
       "https://www.googleapis.com/auth/userinfo.email",
@@ -25,6 +27,7 @@ export const RedirectUserToGoogle = async (req: Request, res: Response) => {
 
 export const GoogleCallback = async (req: Request, res: Response) => {
   const code = req.query.code as string;
+  console.log("Google callback code:", code);
 
   if (!code) {
     return res.status(400).send("No code provided");
@@ -32,19 +35,28 @@ export const GoogleCallback = async (req: Request, res: Response) => {
 
   //   exchange the code for an access token
 
-  const { data } = await axios.post("https://oauth2.googleapis.com/token", {
-    code,
-    client_id: process.env.GOOGLE_CLIENT_ID,
-    client_secret: process.env.GOOGLE_CLIENT_SECRET,
-    redirect_uri: process.env.GOOGLE_CALLBACK_URL,
-    grant_type: "authorization_code",
-  });
+  const { data } = await axios.post(
+    "https://oauth2.googleapis.com/token",
+    qs.stringify({
+      code,
+      client_id: process.env.GOOGLE_CLIENT_ID,
+      client_secret: process.env.GOOGLE_CLIENT_SECRET,
+      redirect_uri: process.env.GOOGLE_CALLBACK_URL,
+      grant_type: "authorization_code",
+    }),
+
+    {
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+    }
+  );
 
   const { access_token } = data;
 
   //   use the access token to get user info
   const userInfoResponse = await axios.get(
-    "https://www.googleapis.com/oauth2/v3/userinfo",
+    "https://www.googleapis.com/oauth2/v2/userinfo",
     {
       headers: {
         Authorization: `Bearer ${access_token}`,
@@ -66,7 +78,7 @@ export const GoogleCallback = async (req: Request, res: Response) => {
       googleId: sub,
     });
   }
-
+  console.log("User found or created:", user);
   // Generate JWT and send as cookie
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
     expiresIn: "7d",
@@ -78,5 +90,5 @@ export const GoogleCallback = async (req: Request, res: Response) => {
   });
 
   // Redirect to frontend
-  res.redirect(`${process.env.FRONTEND_URL}`);
+  res.redirect(`${process.env.FRONTEND_URL}/artist`);
 };
