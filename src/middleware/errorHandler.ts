@@ -7,6 +7,7 @@ function ErrorHandlerMiddleware(
   res: Response,
   next: NextFunction
 ) {
+  // console.error("Error occurred:", err);
   const message = err.message || "Internal Server Error";
   const statusCode = err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
 

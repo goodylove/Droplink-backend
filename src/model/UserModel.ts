@@ -3,8 +3,17 @@ import mongoose from "mongoose";
 const UserSchema = new mongoose.Schema(
   {
     name: String,
-    email: String,
+    email: {
+      type: String,
+      required: true,
+      unique: true, // Ensure email is unique
+    },
     password: String,
+    avatar: String,
+    googleId: {
+      type: String,
+      unique: true,
+    },
   },
   { timestamps: true }
 );
