@@ -18,7 +18,7 @@ export function attachCookieToResponse({
   refreshToken?: string;
 }) {
   const accessToken = createJwt({ userId });
-  const refreshTokenJwt = createJwt({ userId, refreshToken });
+ 
 
   const oneDay = 1000 * 60 * 60 * 24;
   const longExp = 1000 * 60 * 60 * 24 * 30;
@@ -31,10 +31,11 @@ export function attachCookieToResponse({
     sameSite: "none",
   });
 
-  res.cookie("refreshToken", refreshTokenJwt, {
+  res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
     // secure: process.env.NODE_ENV === "production",
     secure: true,
+    
     expires: new Date(Date.now() + longExp),
     sameSite: "none",
   });

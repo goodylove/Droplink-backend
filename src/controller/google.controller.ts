@@ -2,7 +2,6 @@ import axios from "axios";
 import { Request, Response } from "express";
 import User from "../model/UserModel";
 import jwt from "jsonwebtoken";
-import { header } from "express-validator";
 import qs from "qs";
 
 export const RedirectUserToGoogle = async (req: Request, res: Response) => {
@@ -10,12 +9,11 @@ export const RedirectUserToGoogle = async (req: Request, res: Response) => {
 
   const options = {
     client_id: process.env.GOOGLE_CLIENT_ID,
-    // client_secret: process.env.GOOGLE_CLIENT_SECRET,
     redirect_uri: process.env.GOOGLE_CALLBACK_URL,
     response_type: "code",
     scope: [
       "https://www.googleapis.com/auth/userinfo.email",
-      " https://www.googleapis.com/auth/userinfo.profile",
+      "https://www.googleapis.com/auth/userinfo.profile",
     ].join(" "),
     access_type: "offline",
     prompt: "consent",
@@ -27,13 +25,12 @@ export const RedirectUserToGoogle = async (req: Request, res: Response) => {
 
 export const GoogleCallback = async (req: Request, res: Response) => {
   const code = req.query.code as string;
-  console.log("Google callback code:", code);
+  console.log("Google callback code:", req.query.code);
 
   if (!code) {
-    return res.status(400).send("No code provided");
+    res.status(400).send("No code provided");
+    return;
   }
-
-  //   exchange the code for an access token
 
   const { data } = await axios.post(
     "https://oauth2.googleapis.com/token",
@@ -54,7 +51,6 @@ export const GoogleCallback = async (req: Request, res: Response) => {
 
   const { access_token } = data;
 
-  //   use the access token to get user info
   const userInfoResponse = await axios.get(
     "https://www.googleapis.com/oauth2/v2/userinfo",
     {
@@ -64,31 +60,33 @@ export const GoogleCallback = async (req: Request, res: Response) => {
     }
   );
 
-  const { email, name, sub } = userInfoResponse.data;
+  const { email, name, id } = userInfoResponse.data;
+  console.log("User info from Google:", userInfoResponse.data);
 
-  // Here you would typically find or create a user in your database
-
-  let user = await User.findOne({ googleId: sub });
+  let user = await User.findOne({ googleId: id });
 
   if (!user) {
-    // Create a new user if not found
-    user = await User.create({
-      name,
-      email,
-      googleId: sub,
-    });
+    user = await User.findOne({ email });
+    if (user) {
+      user.googleId = id;
+      await user.save();
+    } else if (!user) {
+      user = await User.create({
+        name,
+        email,
+        googleId: id,
+      });
+    }
   }
-  console.log("User found or created:", user);
-  // Generate JWT and send as cookie
   const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, {
-    expiresIn: "7d",
+    expiresIn: "2d",
   });
-  res.cookie("token", token, {
+  res.cookie("accessToken", token, {
     httpOnly: true,
-    secure: false,
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 2 * 24 * 60 * 60 * 1000,
     sameSite: "lax",
   });
 
-  // Redirect to frontend
   res.redirect(`${process.env.FRONTEND_URL}/artist`);
 };

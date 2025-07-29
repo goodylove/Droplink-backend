@@ -12,7 +12,7 @@ const UserSchema = new mongoose.Schema(
     avatar: String,
     googleId: {
       type: String,
-      unique: true, // Optional but recommended
+      unique: true,
     },
   },
   { timestamps: true }

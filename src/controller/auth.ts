@@ -3,8 +3,13 @@ import crypto from "crypto";
 import User from "../model/UserModel";
 import Token from "../model/token";
 import { comparePassword, hashPassword } from "../utils/hashPassword";
-import { BadRequestError, UnauthenticatedError } from "../errors/customsErrors";
+import {
+  BadRequestError,
+  UnauthenticatedError,
+  UnAuthorized,
+} from "../errors/customsErrors";
 import { attachCookieToResponse, createJwt } from "../utils/token";
+import { addDays } from "date-fns";
 
 // Create a new user
 export const Register = async (req: any, res: any) => {
@@ -22,7 +27,17 @@ export const Register = async (req: any, res: any) => {
 
 // Login user
 export const Login = async (req: any, res: any) => {
+  if (!req.body.email || !req.body.password) {
+    throw new BadRequestError("All fields are required");
+  }
+
   const user = await User.findOne({ email: req.body.email });
+
+  if (!user) throw new UnauthenticatedError("Invalid credentials");
+
+  if (!user.password && user.googleId) {
+    throw new UnauthenticatedError("Please login with Google");
+  }
 
   const userValid =
     user && (await comparePassword(req.body.password, user.password));
@@ -40,21 +55,19 @@ export const Login = async (req: any, res: any) => {
   // create refreshToken
   let refreshToken = "";
 
-  // check for existing token
   const existingToken = await Token.findOne({ user: user._id });
 
-  if (existingToken) {
-    if (!existingToken.isValid) {
-      throw new UnauthenticatedError("invalid credentials");
-    }
-    refreshToken = existingToken?.refreshToken;
-    attachCookieToResponse({ res, userId: user._id, refreshToken });
-    res
-      .status(StatusCodes.OK)
-      .json({ message: "User loggedIn successfully", userDetails });
+  if (existingToken && existingToken.expiresAt > new Date()) {
+    attachCookieToResponse({
+      res,
+      userId: user._id,
+      refreshToken: existingToken.refreshToken,
+    });
+    res.status(StatusCodes.OK).json({ message: "User loggedIn successfully" });
     return;
   }
 
+  
   // create new token if no existing token
 
   refreshToken = crypto.randomBytes(40).toString("hex");
@@ -85,4 +98,30 @@ export const Logout = async (req: any, res: any) => {
     expires: new Date(Date.now()),
   });
   res.status(StatusCodes.OK).send("User logged out successfully");
+};
+
+export const RefreshToken = async (req: any, res: any) => {
+  const oldResfreshToken = req.cookies.refreshToken;
+
+  const existingToken = await Token.findOne({
+    refreshToken: oldResfreshToken,
+  }).populate("user");
+
+  if (!existingToken || existingToken.expiresAt < new Date()) {
+    throw new UnAuthorized("Invalid token");
+  }
+
+  await Token.deleteOne({ refreshToken: existingToken.refreshToken });
+
+  const refreshToken = crypto.randomBytes(32).toString("hex");
+
+  await Token.create({
+    refreshToken,
+    user: existingToken.user._id,
+    userAgent: req.headers["user-agent"],
+    expiresAt: addDays(new Date(), 7),
+  });
+  attachCookieToResponse({ res, refreshToken, userId: existingToken.user._id });
+
+  res.status(StatusCodes.OK).json({ message: "New refresh token created " });
 };
