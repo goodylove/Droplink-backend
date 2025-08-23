@@ -1,60 +1,51 @@
-import { NextFunction, Request, Response } from "express";
-import { UnauthenticatedError, UnAuthorized } from "../errors/customsErrors";
+import { NextFunction, Response } from "express";
 import { attachCookieToResponse, verifyJwt } from "../utils/token";
-import { CustomRequest } from "../types/interface";
+import { UnauthenticatedError } from "../errors/customsErrors";
 import Token from "../model/token";
 
-export const authMiddleware = async (
-  req: CustomRequest,
-  res: Response,
-  next: NextFunction
-) => {
-  const { refreshToken, accessToken } = req.cookies;
-  // console.log(refreshToken);
+async function authMiddleware(req: any, res: Response, next: NextFunction) {
+  const { accessToken, refreshToken } = req.cookies;
 
   try {
     if (accessToken) {
-      const verifyUser = verifyJwt(accessToken);
-      if (typeof verifyUser !== "string" && "userId" in verifyUser) {
-        req.user = verifyUser.userId;
-        return next();
-      } else {
-        throw new UnauthenticatedError("Invalid token payload");
+      try {
+        const decoded = verifyJwt(accessToken);
+        if (
+          decoded &&
+          typeof decoded !== "string" &&
+          decoded.hasOwnProperty("userId")
+        ) {
+          req.user = decoded.userId;
+          return next();
+        }
+        throw new UnauthenticatedError("Invalid access token");
+      } catch (error) {
+        if (error.name !== "TokenExpiredError") {
+          throw new UnauthenticatedError("Invalid access token");
+        }
       }
     }
 
     if (!refreshToken) {
-      throw new UnAuthorized("No refreshToken provided");
+      throw new UnauthenticatedError("No refresh token provided");
     }
-    const payload = verifyJwt(refreshToken);
 
-    if (
-      typeof payload !== "string" &&
-      "userId" in payload &&
-      "refreshToken" in payload
-    ) {
-      const existingToken = await Token.findOne({
-        user: payload.userId,
-        refreshToken: payload.refreshToken,
-      });
+    const storedRefreshToken = await Token.findOne({ refreshToken });
 
-      if (!existingToken || !existingToken.isValid) {
-        throw new UnAuthorized("Invalid refresh token");
-      }
-
-      attachCookieToResponse({
-        res,
-        userId: payload.userId,
-        refreshToken: existingToken.refreshToken,
-      });
-
-      req.user = payload.userId;
-      next();
-    } else {
-      throw new UnauthenticatedError("Invalid token payload");
+    if (!storedRefreshToken || storedRefreshToken.expiresAt < new Date()) {
+      throw new UnauthenticatedError("Invalid refresh token");
     }
+
+    const newAccessToken = attachCookieToResponse({
+      res,
+      userId: storedRefreshToken.user,
+      refreshToken: storedRefreshToken.refreshToken,
+    });
+    req.user = storedRefreshToken.user;
+    next();
   } catch (error) {
-    console.log(error);
-    throw new UnauthenticatedError("authentication Failed");
+    next(error);
   }
-};
+}
+
+export default authMiddleware;

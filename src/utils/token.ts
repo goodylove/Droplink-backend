@@ -27,6 +27,7 @@ export function attachCookieToResponse({
     httpOnly: true,
     // secure: process.env.NODE_ENV === "production",
     secure: true,
+    
     expires: new Date(Date.now() + oneDay * 3),
     sameSite: "none",
   });
